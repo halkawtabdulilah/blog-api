@@ -2,12 +2,109 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\PaginationHelper;
 use App\Models\Category;
 use Illuminate\Http\Request;
 
 class CategoryController extends Controller
 {
-    public function index(Request $request) {}
+    /**
+     * Get a paginated list of categories with optional search and sorting.
+     *
+     * @OA\Get(
+     *     path="/api/categories",
+     *     tags={"Categories"},
+     *     summary="List all categories",
+     *     description="Returns paginated categories with optional filtering and sorting",
+     *     @OA\Parameter(
+     *         name="page",
+     *         in="query",
+     *         description="Page number",
+     *         required=false,
+     *         @OA\Schema(type="integer", default=1)
+     *     ),
+     *     @OA\Parameter(
+     *         name="limit",
+     *         in="query",
+     *         description="Items per page",
+     *         required=false,
+     *         @OA\Schema(type="integer", default=10)
+     *     ),
+     *     @OA\Parameter(
+     *         name="search",
+     *         in="query",
+     *         description="Search term for category names",
+     *         required=false,
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Parameter(
+     *         name="sort",
+     *         in="query",
+     *         description="Field to sort by (default: id)",
+     *         required=false,
+     *         @OA\Schema(type="string", default="id")
+     *     ),
+     *     @OA\Parameter(
+     *         name="direction",
+     *         in="query",
+     *         description="Sort direction (asc/desc)",
+     *         required=false,
+     *         @OA\Schema(type="string", default="asc", enum={"asc", "desc"})
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation",
+     *         @OA\JsonContent(
+     *             @OA\Property(
+     *                 property="meta",
+     *                 type="object",
+     *                 @OA\Property(property="page", type="integer", example=1),
+     *                 @OA\Property(property="pages", type="integer", example=5),
+     *                 @OA\Property(property="limit", type="integer", example=10),
+     *                 @OA\Property(property="total", type="integer", example=50)
+     *             ),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="array",
+     *                 @OA\Items(ref="#/components/schemas/Category")
+     *             )
+     *         )
+     *     )
+     * )
+     */
+    public function index(Request $request) {
+
+        [
+            'page' => $page,
+            'limit' => $limit,
+            'search' => $search,
+            'orderBy' => $orderBy,
+            'direction' => $direction,
+        ] = PaginationHelper::getPaginationParams($request);
+
+        $query = Category::query();
+
+        if ($search) {
+            $query->where('name', 'LIKE', "%$search%");
+        }
+
+        // Apply sorting
+        $query->orderBy($orderBy, $direction);
+
+        // Paginate results
+        $categories = $query->paginate($limit, ['*'], 'page', $page);
+
+        // Return response with pagination meta
+        return response()->json([
+            'meta' => [
+                'page' => $categories->currentPage(),
+                'pages' => $categories->lastPage(),
+                'limit' => (int) $limit,
+                'total' => $categories->total(),
+            ],
+            'data' => $categories->items()
+        ]);
+    }
 
     /**
      * @OA\Post(
@@ -129,7 +226,41 @@ class CategoryController extends Controller
         return response()->json($category, 201);
 
     }
-    public function show(Request $request) {}
-    public function update(Request $request) {}
+
+    /**
+     * Display a single category by ID
+     *
+     * @OA\Get(
+     *     path="/api/categories/{id}",
+     *     tags={"Categories"},
+     *     summary="Get a single category",
+     *     description="Returns category details by ID",
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="Category ID",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation",
+     *         @OA\JsonContent(ref="#/components/schemas/Category")
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Category not found",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Category not found")
+     *         )
+     *     )
+     * )
+     */
+    public function show(Request $request, Category $category) {
+        return response()->json($category);
+    }
+    public function update(Request $request, Category $category) {
+
+    }
     public function delete(Request $request) {}
 }
