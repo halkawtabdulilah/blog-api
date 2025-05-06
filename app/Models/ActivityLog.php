@@ -12,14 +12,16 @@ class ActivityLog extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        "type",
+        "action",
         "entity_type",
         "entity_id",
         "changed_fields", //json of the updated fields
         "actor"
     ];
 
-
+    protected $casts = [
+        'changed_fields' => 'array'
+    ];
 
     public function loggable(): MorphTo
     {

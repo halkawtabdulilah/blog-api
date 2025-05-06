@@ -14,9 +14,9 @@ return new class extends Migration
         Schema::create('activity_logs', function (Blueprint $table) {
             $table->id();
             $table->dateTime('timestamp')->useCurrent();
-            $table->enum('action_type', ["CREATE", "READ", "UPDATE", "DELETE"]);
-            $table->morphs("entity_type");
-            $table->string("entity_id");
+            $table->enum('action', ["CREATE", "READ", "UPDATE", "DELETE"]);
+            $table->morphs("entity");
+            $table->string("actor");
             $table->json('changed_fields')->nullable();
             $table->timestamps();
         });
