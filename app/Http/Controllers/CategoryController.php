@@ -4,10 +4,20 @@ namespace App\Http\Controllers;
 
 use App\Helpers\PaginationHelper;
 use App\Models\Category;
+use App\Services\ActivityLogService;
 use Illuminate\Http\Request;
 
 class CategoryController extends Controller
 {
+
+    protected $activityLogService;
+
+    public function __construct(ActivityLogService $activityLogService)
+    {
+        $this->activityLogService = $activityLogService;
+    }
+
+
     /**
      * Get a paginated list of categories with optional search and sorting.
      *
@@ -322,7 +332,13 @@ class CategoryController extends Controller
             "description" => "nullable|string|max:255",
         ]);
 
-        $category->update($validated);
+        $changedFields = $this->activityLogService->getUpdatedFields(Category::class, $category, $validated);
+
+        $categoryIsUpdated = $category->update($validated);
+
+        if($categoryIsUpdated) {
+            $this->activityLogService->logActivity("UPDATE", Category::class, $category->id, "John Doe", $changedFields);
+        }
 
         return response()->json(['message' => 'Category updated successfully']);
 
