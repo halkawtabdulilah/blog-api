@@ -2,9 +2,9 @@
 
 namespace Tests\Feature\Category;
 
-// use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Models\Category;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class UpdateCategoryTest extends TestCase
@@ -12,8 +12,7 @@ class UpdateCategoryTest extends TestCase
 
     use RefreshDatabase;
 
-    /** @test */
-    public function endpoint_updates_category(): void
+    #[Test] public function endpoint_updates_category(): void
     {
 
         $category = Category::factory()->create([
@@ -44,8 +43,7 @@ class UpdateCategoryTest extends TestCase
         ]);
 
     }
-    /** @test */
-    public function endpoint_updates_category_with_activity_log(): void
+    #[Test] public function endpoint_updates_category_with_activity_log(): void
     {
 
         $category = Category::factory()->create([

@@ -6,6 +6,7 @@ namespace Feature\Post;
 use App\Models\Category;
 use App\Models\Post;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class UpdatePostTest extends TestCase
@@ -13,8 +14,7 @@ class UpdatePostTest extends TestCase
 
     use RefreshDatabase;
 
-    /** @test */
-    public function endpoint_updates_post_title()
+    #[Test] public function endpoint_updates_post_title()
     {
         $post = Post::factory()->create(['title' => 'Old Title']);
         $newData = ['title' => 'New Title'];
@@ -30,8 +30,7 @@ class UpdatePostTest extends TestCase
         ]);
     }
 
-    /** @test */
-    public function endpoint_updates_post_content()
+    #[Test] public function endpoint_updates_post_content()
     {
         $post = Post::factory()->create(['content' => 'Old content']);
         $longContent = str_repeat('New content.', 10);
@@ -47,8 +46,7 @@ class UpdatePostTest extends TestCase
         ]);
     }
 
-    /** @test */
-    public function endpoint_updates_post_category()
+    #[Test] public function endpoint_updates_post_category()
     {
         $post = Post::factory()->create();
         $newCategory = Category::factory()->create();
@@ -61,8 +59,7 @@ class UpdatePostTest extends TestCase
         $this->assertEquals($newCategory->id, $post->fresh()->category_id);
     }
 
-    /** @test */
-    public function endpoint_allows_same_title_for_same_post()
+    #[Test] public function endpoint_allows_same_title_for_same_post()
     {
         $post = Post::factory()->create(['title' => 'Existing Title']);
 
@@ -73,8 +70,7 @@ class UpdatePostTest extends TestCase
         $response->assertStatus(200);
     }
 
-    /** @test */
-    public function endpoint_rejects_invalid_category_id()
+    #[Test] public function endpoint_rejects_invalid_category_id()
     {
         $post = Post::factory()->create();
 
@@ -86,8 +82,7 @@ class UpdatePostTest extends TestCase
             ->assertJsonValidationErrors(['category_id']);
     }
 
-    /** @test */
-    public function endpoint_updates_post_title_with_activity_log()
+    #[Test] public function endpoint_updates_post_title_with_activity_log()
     {
         $post = Post::factory()->create(['title' => 'Old Title']);
         $newData = ['title' => 'New Title'];
@@ -118,8 +113,7 @@ class UpdatePostTest extends TestCase
 
     }
 
-    /** @test */
-    public function endpoint_updates_post_content_with_activity_log()
+    #[Test] public function endpoint_updates_post_content_with_activity_log()
     {
         $post = Post::factory()->create(['content' => 'Old Content']);
         $longContent = 'New Content.';
@@ -150,8 +144,7 @@ class UpdatePostTest extends TestCase
 
     }
 
-    /** @test */
-    public function endpoint_updates_post_category_with_activity_log()
+    #[Test] public function endpoint_updates_post_category_with_activity_log()
     {
         $post = Post::factory()->create();
         $newCategory = Category::factory()->create();

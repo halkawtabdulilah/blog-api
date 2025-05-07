@@ -5,6 +5,7 @@ namespace Tests\Feature\Category;
 // use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Models\Category;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class CreateCategoryTest extends TestCase
@@ -12,10 +13,7 @@ class CreateCategoryTest extends TestCase
 
     use RefreshDatabase;
 
-    /**
-     * A basic test example.
-     */
-    public function test_user_can_create_category(): void
+    #[Test] public function test_user_can_create_category(): void
     {
 
         $userData = [
@@ -28,8 +26,7 @@ class CreateCategoryTest extends TestCase
 
         $response->assertStatus(201);
     }
-    /** @test */
-    public function test_user_can_create_category_with_activity_log(): void
+    #[Test] public function test_user_can_create_category_with_activity_log(): void
     {
 
         $userData = [

@@ -5,6 +5,7 @@ namespace Tests\Feature\Post;
 use App\Models\Category;
 use App\Models\Post;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class CreatePostTest extends TestCase
@@ -12,8 +13,7 @@ class CreatePostTest extends TestCase
 
     use RefreshDatabase;
 
-    /** @test */
-    public function test_user_can_create_post(): void
+    #[Test] public function test_user_can_create_post(): void
     {
 
         $category = Category::factory()->create();
@@ -29,8 +29,7 @@ class CreatePostTest extends TestCase
 
         $response->assertStatus(201);
     }
-    /** @test */
-    public function test_user_can_create_post_with_activity_log(): void
+    #[Test] public function test_user_can_create_post_with_activity_log(): void
     {
 
         $category = Category::factory()->create();
@@ -54,8 +53,7 @@ class CreatePostTest extends TestCase
 
     }
 
-    /** @test */
-    public function test_user_cannot_create_post_with_fake_category_id(): void
+    #[Test] public function test_user_cannot_create_post_with_fake_category_id(): void
     {
 
         $category = Category::factory()->create();

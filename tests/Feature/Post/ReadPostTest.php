@@ -5,6 +5,7 @@ namespace Feature\Post;
 use App\Models\Category;
 use App\Models\Post;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class ReadPostTest extends TestCase
@@ -12,8 +13,7 @@ class ReadPostTest extends TestCase
 
     use RefreshDatabase;
 
-    /** @test */
-    public function endpoint_returns_paginated_posts(): void
+    #[Test] public function endpoint_returns_paginated_posts(): void
     {
 
         Post::factory()->count(15)->create();
@@ -45,8 +45,7 @@ class ReadPostTest extends TestCase
             ]);
     }
 
-    /** @test */
-    public function endpoint_filters_posts_by_search_term_and_category()
+    #[Test] public function endpoint_filters_posts_by_search_term_and_category()
     {
         // Create test categories
         $techCategory = Category::factory()->create(['name' => 'Technology']);
@@ -91,10 +90,7 @@ class ReadPostTest extends TestCase
             ->assertJsonMissing(['title' => $classicalPhysics->title]);
     }
 
-    /**
-     * @test
-     */
-    public function endpoint_filters_posts_by_category_slug()
+    #[Test] public function endpoint_filters_posts_by_category_slug()
     {
         $techCategory = Category::factory()->create(['slug' => 'tech']);
         Post::factory()->create(['category_id' => $techCategory->id]);
@@ -106,8 +102,7 @@ class ReadPostTest extends TestCase
             ->assertJsonPath('data.0.category.slug', 'tech');
     }
 
-    /** @test */
-    public function endpoint_returns_single_post() {
+    #[Test] public function endpoint_returns_single_post() {
         Post::factory()->count(5)->create();
         $qc = Post::factory()->create(['title' => 'Quantum Computing']);
         Post::factory()->count(4)->create();
@@ -120,8 +115,7 @@ class ReadPostTest extends TestCase
         ]);
 
     }
-    /** @test */
-    public function endpoint_returns_single_post_with_activity_log() {
+    #[Test] public function endpoint_returns_single_post_with_activity_log() {
         Post::factory()->count(5)->create();
         $qc = Post::factory()->create(['title' => 'Quantum Computing']);
         Post::factory()->count(4)->create();
