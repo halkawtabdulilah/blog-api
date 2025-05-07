@@ -599,13 +599,6 @@
                                         "description": "ID of an existing category",
                                         "type": "integer",
                                         "example": 1
-                                    },
-                                    "published_at": {
-                                        "description": "Optional publication timestamp",
-                                        "type": "string",
-                                        "format": "date-time",
-                                        "example": "2023-01-01T12:00:00Z",
-                                        "nullable": true
                                     }
                                 },
                                 "type": "object"
@@ -641,13 +634,7 @@
                                             "example": 1
                                         },
                                         "category": {
-                                            "$ref": "#/components/schemas/Category"
-                                        },
-                                        "published_at": {
-                                            "type": "string",
-                                            "format": "date-time",
-                                            "example": "2023-01-01T12:00:00Z",
-                                            "nullable": true
+                                            "$ref": "#/components/schemas/Post"
                                         },
                                         "created_at": {
                                             "type": "string",
@@ -828,6 +815,51 @@
             }
         },
         "/api/post/{post}": {
+            "delete": {
+                "tags": [
+                    "Posts"
+                ],
+                "summary": "Delete a post",
+                "description": "Permanently removes a post from the system",
+                "operationId": "c8ea09ed8f1261885a937483293bd900",
+                "parameters": [
+                    {
+                        "name": "post",
+                        "in": "path",
+                        "description": "Post ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Post deleted successfully"
+                    },
+                    "404": {
+                        "description": "Post not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Post not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
             "patch": {
                 "tags": [
                     "Posts"

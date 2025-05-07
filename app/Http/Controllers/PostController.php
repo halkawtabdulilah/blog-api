@@ -139,14 +139,6 @@ class PostController extends Controller
      *                     type="integer",
      *                     example=1,
      *                     description="ID of an existing category"
-     *                 ),
-     *                 @OA\Property(
-     *                     property="published_at",
-     *                     type="string",
-     *                     format="date-time",
-     *                     nullable=true,
-     *                     example="2023-01-01T12:00:00Z",
-     *                     description="Optional publication timestamp"
      *                 )
      *             )
      *         )
@@ -162,14 +154,7 @@ class PostController extends Controller
      *             @OA\Property(property="category_id", type="integer", example=1),
      *             @OA\Property(
      *                 property="category",
-     *                 ref="#/components/schemas/Category"
-     *             ),
-     *             @OA\Property(
-     *                 property="published_at",
-     *                 type="string",
-     *                 format="date-time",
-     *                 nullable=true,
-     *                 example="2023-01-01T12:00:00Z"
+     *                 ref="#/components/schemas/Post"
      *             ),
      *             @OA\Property(
      *                 property="created_at",
@@ -361,9 +346,39 @@ class PostController extends Controller
         return response()->json(['message' => 'Post updated successfully']);
     }
 
+    /**
+     * Delete a post.
+     *
+     * @OA\Delete(
+     *     path="/api/post/{post}",
+     *     tags={"Posts"},
+     *     summary="Delete a post",
+     *     description="Soft Deletes a post from the system",
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Parameter(
+     *         name="post",
+     *         in="path",
+     *         required=true,
+     *         description="Post ID",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=204,
+     *         description="Post deleted successfully",
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Post not found",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Post not found")
+     *         )
+     *     )
+     * )
+     */
     public function destroy(Request $request, Post $post)
     {
-
+        $post->delete();
+        return response()->noContent();
     }
 
 }
