@@ -4,10 +4,18 @@ namespace App\Http\Controllers;
 
 use App\Helpers\PaginationHelper;
 use App\Models\Post;
+use App\Services\ActivityLogService;
 use Illuminate\Http\Request;
 
 class PostController extends Controller
 {
+
+    protected $activityLogService;
+
+    public function __construct(ActivityLogService $activityLogService)
+    {
+        $this->activityLogService = $activityLogService;
+    }
 
     /**
      * @OA\Get(
@@ -209,6 +217,7 @@ class PostController extends Controller
      * )
      */
     public function store(Request $request) {
+
         $validated = $request->validate([
             "title" => "required|string|max:255",
             "content" => "required|string",
@@ -217,6 +226,10 @@ class PostController extends Controller
         ]);
 
         $post = Post::create($validated);
+
+        if($post) {
+            $this->activityLogService->logActivity("CREATE", Post::class, $post->id, "John Doe");
+        }
 
         return response()->json($post, 201);
 
@@ -335,6 +348,7 @@ class PostController extends Controller
      */
     public function update(Request $request, Post $post)
     {
+
         $validated = $request->validate([
             "title" => "nullable|string|max:255",
             "content" => "nullable|string",
