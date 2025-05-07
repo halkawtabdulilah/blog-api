@@ -21,7 +21,7 @@ class PostFactory extends Factory
             "title" => fake()->title(),
             "content" => fake()->paragraph(30),
             "author" => fake()->name(),
-            "category_id" => rand(1, Category::count()),
+            'category_id' => Category::factory(),
         ];
     }
 }
