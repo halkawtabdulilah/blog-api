@@ -22,6 +22,23 @@ class DeletePostTest extends TestCase
         $response->assertStatus(204);
         $this->assertDatabaseMissing('posts', [['id' => $post->id]]);
     }
+    /** @test */
+    public function endpoint_deletes_posts_successfully_with_activity_logs()
+    {
+        $post = Post::factory()->create();
+
+        $response = $this->deleteJson("/api/post/{$post->id}");
+
+        $response->assertStatus(204);
+        $this->assertDatabaseMissing('posts', [['id' => $post->id]]);
+
+        $this->assertDatabaseHas('activity_logs', [
+            'action' => "DELETE",
+            'entity_type' => get_class($post),
+            'entity_id' => $post->id
+        ]);
+
+    }
 
     /** @test */
     public function endpoint_returns_404_for_nonexistent_posts()

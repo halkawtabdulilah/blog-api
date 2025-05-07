@@ -292,6 +292,11 @@ class PostController extends Controller
      */
     public function show(Request $request, Post $post)
     {
+
+        if($post) {
+            $this->activityLogService->logActivity("READ", Post::class, $post->id, "John Doe");
+        }
+
         return response()->json($post->load(['category' => function ($query) {
             $query->select('id', 'name', 'slug');
         }]));
@@ -398,7 +403,12 @@ class PostController extends Controller
      */
     public function destroy(Request $request, Post $post)
     {
-        $post->delete();
+        $postIsDeleted = $post->delete();
+
+        if($postIsDeleted) {
+            $this->activityLogService->logActivity("DELETE", Post::class, $post->id, "John Doe");
+        }
+
         return response()->noContent();
     }
 

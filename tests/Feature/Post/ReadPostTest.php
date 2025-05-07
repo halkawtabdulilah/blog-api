@@ -106,4 +106,39 @@ class ReadPostTest extends TestCase
             ->assertJsonPath('data.0.category.slug', 'tech');
     }
 
+    /** @test */
+    public function endpoint_returns_single_post() {
+        Post::factory()->count(5)->create();
+        $qc = Post::factory()->create(['title' => 'Quantum Computing']);
+        Post::factory()->count(4)->create();
+
+        $response = $this->getJson('/api/post/6');
+
+        $response->assertStatus(200);
+        $response->assertJsonFragment([
+            'title' => 'Quantum Computing',
+        ]);
+
+    }
+    /** @test */
+    public function endpoint_returns_single_post_with_activity_log() {
+        Post::factory()->count(5)->create();
+        $qc = Post::factory()->create(['title' => 'Quantum Computing']);
+        Post::factory()->count(4)->create();
+
+        $response = $this->getJson('/api/post/6');
+
+        $response->assertStatus(200);
+        $response->assertJsonFragment([
+            'title' => 'Quantum Computing',
+        ]);
+
+        $this->assertDatabaseHas('activity_logs', [
+            'action' => "READ",
+            'entity_type' => get_class($qc),
+            'entity_id' => $qc->id,
+        ]);
+
+    }
+
 }
