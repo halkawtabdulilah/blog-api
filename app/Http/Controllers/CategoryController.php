@@ -271,6 +271,11 @@ class CategoryController extends Controller
      * )
      */
     public function show(Request $request, Category $category) {
+
+        if($category) {
+            $this->activityLogService->logActivity("READ", Category::class, $category->id, "John Doe");
+        }
+
         return response()->json($category);
     }
 

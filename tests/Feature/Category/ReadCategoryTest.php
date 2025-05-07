@@ -12,15 +12,13 @@ class ReadCategoryTest extends TestCase
 
     use RefreshDatabase;
 
-    /**
-     * A basic test example.
-     */
+    /** @test */
     public function endpoint_returns_paginated_categories(): void
     {
 
         Category::factory()->count(15)->create();
 
-        $response = $this->getJson('/api/categories?page=2&limit=5');
+        $response = $this->getJson('/api/category?page=2&limit=5');
 
         // Assert
         $response->assertStatus(200)
@@ -69,6 +67,29 @@ class ReadCategoryTest extends TestCase
 
         $response = $this->getJson('/api/category/5');
 
+        $response->assertStatus(200);
+        $response->assertJsonFragment([
+            'name' => 'Electronics',
+        ]);
+
+    }
+    public function endpoint_returns_single_category_with_activity_log() {
+        Category::factory()->count(5)->create();
+        $electronics = Category::factory()->create(['name' => 'Electronics']);
+        Category::factory()->count(4)->create();
+
+        $response = $this->getJson('/api/category/5');
+
+        $response->assertStatus(200);
+        $response->assertJsonFragment([
+            'name' => 'Electronics',
+        ]);
+
+        $this->assertDatabaseHas('activity_logs', [
+            'action' => "READ",
+            'entity_type' => get_class($electronics),
+            'entity_id' => $electronics->id,
+        ]);
 
     }
 
