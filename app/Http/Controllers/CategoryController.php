@@ -233,6 +233,10 @@ class CategoryController extends Controller
 
         $category = Category::create($validated);
 
+        if($category) {
+            $this->activityLogService->logActivity("CREATE", Category::class, $category->id, "John Doe");
+        }
+
         return response()->json($category, 201);
 
     }
