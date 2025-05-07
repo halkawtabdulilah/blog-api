@@ -9,4 +9,4 @@ Route::resource('/category', CategoryController::class);
 Route::resource('/post', PostController::class);
 
 Route::get('/logs', [ActivityLogController::class, 'index']);
-Route::post('/logs/revert/{ActivityLog}', [ActivityLogController::class, 'revertToLogVersion']);
+Route::post('/logs/revert/{activityLog}', [ActivityLogController::class, 'revertToLogVersion']);

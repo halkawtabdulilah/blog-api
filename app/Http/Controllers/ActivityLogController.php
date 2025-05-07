@@ -131,7 +131,77 @@ class ActivityLogController extends Controller
     }
 
 
-    public function revertToLogVersion() {
+    /**
+     * @OA\Post(
+     *     path="/api/logs/revert/{activityLog}",
+     *     tags={"Activity Logs"},
+     *     summary="Revert an updated entity to its previous state using an activity log",
+     *     description="Restores an entity's fields to their 'before' state from the specified activity log entry",
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Parameter(
+     *         name="activityLog",
+     *         in="path",
+     *         description="ID of the activity log entry to revert from",
+     *         required=true,
+     *         @OA\Schema(type="integer", example=1)
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful revert",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Successfully reverted to previous version"),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="object",
+     *                 ref="#/components/schemas/Post"
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Activity log or entity not found",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Activity log not found"),
+     *             @OA\Property(property="error", type="string", example="No query results for model [App\\Models\\ActivityLog] 1")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Revert failed",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Revert failed"),
+     *             @OA\Property(property="error", type="string", example="Trying to get property 'before' of non-object")
+     *         )
+     *     )
+     * )
+     */
+    public function revertToLogVersion(Request $request, ActivityLog $activityLog) {
 
+        try {
+
+            $modelClass = $activityLog->entity_type;
+            $modelId = $activityLog->entity_id;
+
+            $model = $modelClass::findOrFail($modelId);
+
+
+            foreach ($activityLog->changed_fields as $field => $changed_item) {
+                $model->$field = $changed_item["before"];
+            }
+
+            $model->save();
+
+            return response()->json([
+                'message' => 'Successfully reverted to previous version',
+                'data' => $model->fresh(),
+            ]);
+
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Revert failed',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 }

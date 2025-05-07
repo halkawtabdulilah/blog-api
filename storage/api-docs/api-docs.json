@@ -143,6 +143,94 @@
                 }
             }
         },
+        "/api/logs/revert/{activityLog}": {
+            "post": {
+                "tags": [
+                    "Activity Logs"
+                ],
+                "summary": "Revert an entity to its previous state using an activity log",
+                "description": "Restores an entity's fields to their 'before' state from the specified activity log entry",
+                "operationId": "18312510bf4397c6c460ba8c90cbc5af",
+                "parameters": [
+                    {
+                        "name": "activityLog",
+                        "in": "path",
+                        "description": "ID of the activity log entry to revert from",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful revert",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Successfully reverted to previous version"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/Post"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Activity log or entity not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Activity log not found"
+                                        },
+                                        "error": {
+                                            "type": "string",
+                                            "example": "No query results for model [App\\\\Models\\\\ActivityLog] 1"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Revert failed",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Revert failed"
+                                        },
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Trying to get property 'before' of non-object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/categories": {
             "get": {
                 "tags": [
