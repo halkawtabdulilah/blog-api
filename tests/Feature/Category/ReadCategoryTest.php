@@ -5,6 +5,7 @@ namespace Tests\Feature\Category;
 // use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Models\Category;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class ReadCategoryTest extends TestCase
@@ -12,15 +13,12 @@ class ReadCategoryTest extends TestCase
 
     use RefreshDatabase;
 
-    /**
-     * A basic test example.
-     */
-    public function endpoint_returns_paginated_categories(): void
+    #[Test] public function endpoint_returns_paginated_categories(): void
     {
 
         Category::factory()->count(15)->create();
 
-        $response = $this->getJson('/api/categories?page=2&limit=5');
+        $response = $this->getJson('/api/category?page=2&limit=5');
 
         // Assert
         $response->assertStatus(200)
@@ -47,8 +45,7 @@ class ReadCategoryTest extends TestCase
             ]);
     }
 
-    /** @test */
-    public function endpoint_filters_categories_by_search_term()
+    #[Test] public function endpoint_filters_categories_by_search_term()
     {
         $electronics = Category::factory()->create(['name' => 'Electronics']);
         $books = Category::factory()->create(['name' => 'Books']);
@@ -62,13 +59,36 @@ class ReadCategoryTest extends TestCase
             ->assertJsonMissing(['name' => $books->name]);
     }
 
-    public function endpoint_returns_single_category() {
+    #[Test] public function endpoint_returns_single_category() {
         Category::factory()->count(5)->create();
         $electronics = Category::factory()->create(['name' => 'Electronics']);
         Category::factory()->count(4)->create();
 
-        $response = $this->getJson('/api/category/5');
+        $response = $this->getJson('/api/category/6');
 
+        $response->assertStatus(200);
+        $response->assertJsonFragment([
+            'name' => 'Electronics',
+        ]);
+
+    }
+    #[Test] public function endpoint_returns_single_category_with_activity_log() {
+        Category::factory()->count(5)->create();
+        $electronics = Category::factory()->create(['name' => 'Electronics']);
+        Category::factory()->count(4)->create();
+
+        $response = $this->getJson('/api/category/6');
+
+        $response->assertStatus(200);
+        $response->assertJsonFragment([
+            'name' => 'Electronics',
+        ]);
+
+        $this->assertDatabaseHas('activity_logs', [
+            'action' => "READ",
+            'entity_type' => get_class($electronics),
+            'entity_id' => $electronics->id,
+        ]);
 
     }
 

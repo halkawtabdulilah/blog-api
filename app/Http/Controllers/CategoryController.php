@@ -4,10 +4,20 @@ namespace App\Http\Controllers;
 
 use App\Helpers\PaginationHelper;
 use App\Models\Category;
+use App\Services\ActivityLogService;
 use Illuminate\Http\Request;
 
 class CategoryController extends Controller
 {
+
+    protected $activityLogService;
+
+    public function __construct(ActivityLogService $activityLogService)
+    {
+        $this->activityLogService = $activityLogService;
+    }
+
+
     /**
      * Get a paginated list of categories with optional search and sorting.
      *
@@ -223,6 +233,10 @@ class CategoryController extends Controller
 
         $category = Category::create($validated);
 
+        if($category) {
+            $this->activityLogService->logActivity("CREATE", Category::class, $category->id, "John Doe");
+        }
+
         return response()->json($category, 201);
 
     }
@@ -257,6 +271,11 @@ class CategoryController extends Controller
      * )
      */
     public function show(Request $request, Category $category) {
+
+        if($category) {
+            $this->activityLogService->logActivity("READ", Category::class, $category->id, "John Doe");
+        }
+
         return response()->json($category);
     }
 
@@ -322,7 +341,13 @@ class CategoryController extends Controller
             "description" => "nullable|string|max:255",
         ]);
 
-        $category->update($validated);
+        $changedFields = $this->activityLogService->getUpdatedFields(Category::class, $category, $validated);
+
+        $categoryIsUpdated = $category->update($validated);
+
+        if($categoryIsUpdated) {
+            $this->activityLogService->logActivity("UPDATE", Category::class, $category->id, "John Doe", $changedFields);
+        }
 
         return response()->json(['message' => 'Category updated successfully']);
 
@@ -365,8 +390,11 @@ class CategoryController extends Controller
      * )
      */
     public function destroy(Request $request, Category $category) {
-        $category->delete();
+        $categoryIsDeleted = $category->delete();
 
+        if($categoryIsDeleted) {
+            $this->activityLogService->logActivity("DELETE", Category::class, $category->id, "John Doe");
+        }
         return response()->noContent();
     }
 }

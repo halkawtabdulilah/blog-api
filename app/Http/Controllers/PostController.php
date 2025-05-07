@@ -4,10 +4,18 @@ namespace App\Http\Controllers;
 
 use App\Helpers\PaginationHelper;
 use App\Models\Post;
+use App\Services\ActivityLogService;
 use Illuminate\Http\Request;
 
 class PostController extends Controller
 {
+
+    protected $activityLogService;
+
+    public function __construct(ActivityLogService $activityLogService)
+    {
+        $this->activityLogService = $activityLogService;
+    }
 
     /**
      * @OA\Get(
@@ -209,6 +217,7 @@ class PostController extends Controller
      * )
      */
     public function store(Request $request) {
+
         $validated = $request->validate([
             "title" => "required|string|max:255",
             "content" => "required|string",
@@ -217,6 +226,10 @@ class PostController extends Controller
         ]);
 
         $post = Post::create($validated);
+
+        if($post) {
+            $this->activityLogService->logActivity("CREATE", Post::class, $post->id, "John Doe");
+        }
 
         return response()->json($post, 201);
 
@@ -279,6 +292,11 @@ class PostController extends Controller
      */
     public function show(Request $request, Post $post)
     {
+
+        if($post) {
+            $this->activityLogService->logActivity("READ", Post::class, $post->id, "John Doe");
+        }
+
         return response()->json($post->load(['category' => function ($query) {
             $query->select('id', 'name', 'slug');
         }]));
@@ -335,13 +353,21 @@ class PostController extends Controller
      */
     public function update(Request $request, Post $post)
     {
+
         $validated = $request->validate([
             "title" => "nullable|string|max:255",
             "content" => "nullable|string",
             "category_id" => "nullable|exists:categories,id",
         ]);
 
-        $post->update($validated);
+        $changedFields = $this->activityLogService->getUpdatedFields(Post::class, $post, $validated);
+
+        $postIsUpdated = $post->update($validated);
+
+        if($postIsUpdated) {
+            // TODO: replace dummy actor with real users
+            $this->activityLogService->logActivity("UPDATE", Post::class, $post->id, "John Doe", $changedFields);
+        }
 
         return response()->json(['message' => 'Post updated successfully']);
     }
@@ -377,7 +403,12 @@ class PostController extends Controller
      */
     public function destroy(Request $request, Post $post)
     {
-        $post->delete();
+        $postIsDeleted = $post->delete();
+
+        if($postIsDeleted) {
+            $this->activityLogService->logActivity("DELETE", Post::class, $post->id, "John Doe");
+        }
+
         return response()->noContent();
     }
 
