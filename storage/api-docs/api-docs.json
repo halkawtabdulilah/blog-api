@@ -12,6 +12,137 @@
         "version": "1.0.0"
     },
     "paths": {
+        "/api/activities": {
+            "get": {
+                "tags": [
+                    "Activity Logs"
+                ],
+                "summary": "List activity logs with filters",
+                "description": "Returns paginated activity logs with action, entity type, and actor filtering",
+                "operationId": "3bf5edadbd6ce763463853e8f4d0ea4f",
+                "parameters": [
+                    {
+                        "name": "action",
+                        "in": "query",
+                        "description": "Filter by action type",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "entity_type",
+                        "in": "query",
+                        "description": "Filter by entity type (e.g., 'post', 'category')",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "actor",
+                        "in": "query",
+                        "description": "Filter by actor name or ID",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "orderBy",
+                        "in": "query",
+                        "description": "Field to sort by",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "created_at",
+                            "enum": [
+                                "created_at",
+                                "updated_at"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "direction",
+                        "in": "query",
+                        "description": "Sort direction",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "desc",
+                            "enum": [
+                                "asc",
+                                "desc"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page number",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 1,
+                            "minimum": 1
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Items per page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 10,
+                            "maximum": 100,
+                            "minimum": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "meta": {
+                                            "properties": {
+                                                "page": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "pages": {
+                                                    "type": "integer",
+                                                    "example": 5
+                                                },
+                                                "limit": {
+                                                    "type": "integer",
+                                                    "example": 10
+                                                },
+                                                "total": {
+                                                    "type": "integer",
+                                                    "example": 50
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/ActivityLog"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/categories": {
             "get": {
                 "tags": [
@@ -820,7 +951,7 @@
                     "Posts"
                 ],
                 "summary": "Delete a post",
-                "description": "Permanently removes a post from the system",
+                "description": "Soft Deletes a post from the system",
                 "operationId": "c8ea09ed8f1261885a937483293bd900",
                 "parameters": [
                     {
@@ -962,6 +1093,73 @@
     },
     "components": {
         "schemas": {
+            "ActivityLog": {
+                "description": "Activity log entry",
+                "required": [
+                    "id",
+                    "action",
+                    "entity_type",
+                    "entity_id",
+                    "actor",
+                    "created_at"
+                ],
+                "properties": {
+                    "id": {
+                        "description": "Unique identifier for the log entry",
+                        "type": "integer",
+                        "format": "int64",
+                        "example": 1
+                    },
+                    "action": {
+                        "description": "Action performed (e.g., created, updated, deleted)",
+                        "type": "string",
+                        "example": "updated"
+                    },
+                    "entity_type": {
+                        "description": "Type of the affected entity",
+                        "type": "string",
+                        "example": "App\\\\Models\\\\Post"
+                    },
+                    "entity_id": {
+                        "description": "ID of the affected entity",
+                        "type": "integer",
+                        "example": 42
+                    },
+                    "changed_fields": {
+                        "description": "JSON object showing before/after values of changed fields",
+                        "type": "object",
+                        "example": {
+                            "title": {
+                                "before": "Old Title",
+                                "after": "New Title"
+                            },
+                            "content": {
+                                "before": "Old content",
+                                "after": "Updated content"
+                            }
+                        },
+                        "nullable": true
+                    },
+                    "actor": {
+                        "description": "User or system that performed the action",
+                        "type": "string",
+                        "example": "john"
+                    },
+                    "created_at": {
+                        "description": "When the action was logged",
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2023-05-15T12:34:56Z"
+                    },
+                    "updated_at": {
+                        "description": "When the log entry was last updated",
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2023-05-15T12:34:56Z"
+                    }
+                },
+                "type": "object"
+            },
             "Category": {
                 "properties": {
                     "id": {
@@ -1051,6 +1249,10 @@
         }
     },
     "tags": [
+        {
+            "name": "Activity Logs",
+            "description": "Activity Logs"
+        },
         {
             "name": "Categories",
             "description": "Categories"
