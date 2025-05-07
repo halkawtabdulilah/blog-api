@@ -11,7 +11,7 @@ class PostController extends Controller
 
     /**
      * @OA\Get(
-     * path="/api/posts",
+     * path="/api/post",
      * tags={"Posts"},
      * summary="List posts with filters",
      * description="Returns paginated posts with search, sorting, and category filtering",
@@ -101,7 +101,7 @@ class PostController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/api/posts",
+     *     path="/api/post",
      *     tags={"Posts"},
      *     summary="Create a new post",
      *     description="Creates a new blog post with the provided details",
@@ -225,7 +225,7 @@ class PostController extends Controller
      */
     public function store(Request $request) {
         $validated = $request->validate([
-            "title" => "required|string|max:255|unique:posts,title",
+            "title" => "required|string|max:255",
             "content" => "required|string",
             "author" => "required|string|max:255",
             "category_id" => "required|exists:categories,id",
@@ -239,7 +239,7 @@ class PostController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/api/posts/{id}",
+     *     path="/api/post/{id}",
      *     tags={"Posts"},
      *     summary="Get a single post",
      *     description="Returns detailed information about a specific post including its category",
@@ -299,9 +299,66 @@ class PostController extends Controller
         }]));
     }
 
+    /**
+     * Update a post's details.
+     *
+     * @OA\Patch(
+     *     path="/api/post/{post}",
+     *     tags={"Posts"},
+     *     summary="Update a post",
+     *     description="Partially update a post's title, content, or category",
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Parameter(
+     *         name="post",
+     *         in="path",
+     *         required=true,
+     *         description="Post ID",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             @OA\Property(property="title", type="string", maxLength=255, nullable=true, example="Updated Title"),
+     *             @OA\Property(property="content", type="string", nullable=true, example="Updated content"),
+     *             @OA\Property(property="category_id", type="integer", nullable=true, example=2)
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Success",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Post updated successfully")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="The given data was invalid."),
+     *             @OA\Property(
+     *                 property="errors",
+     *                 type="object",
+     *                 @OA\Property(
+     *                     property="category_id",
+     *                     type="array",
+     *                     @OA\Items(type="string", example="The selected category id is invalid.")
+     *                 )
+     *             )
+     *         )
+     *     )
+     * )
+     */
     public function update(Request $request, Post $post)
     {
+        $validated = $request->validate([
+            "title" => "nullable|string|max:255",
+            "content" => "nullable|string",
+            "category_id" => "nullable|exists:categories,id",
+        ]);
 
+        $post->update($validated);
+
+        return response()->json(['message' => 'Post updated successfully']);
     }
 
     public function destroy(Request $request, Post $post)
