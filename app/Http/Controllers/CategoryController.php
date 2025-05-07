@@ -381,8 +381,11 @@ class CategoryController extends Controller
      * )
      */
     public function destroy(Request $request, Category $category) {
-        $category->delete();
+        $categoryIsDeleted = $category->delete();
 
+        if($categoryIsDeleted) {
+            $this->activityLogService->logActivity("DELETE", Category::class, $category->id, "John Doe");
+        }
         return response()->noContent();
     }
 }
