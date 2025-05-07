@@ -355,7 +355,14 @@ class PostController extends Controller
             "category_id" => "nullable|exists:categories,id",
         ]);
 
-        $post->update($validated);
+        $changedFields = $this->activityLogService->getUpdatedFields(Post::class, $post, $validated);
+
+        $postIsUpdated = $post->update($validated);
+
+        if($postIsUpdated) {
+            // TODO: replace dummy actor with real users
+            $this->activityLogService->logActivity("UPDATE", Post::class, $post->id, "John Doe", $changedFields);
+        }
 
         return response()->json(['message' => 'Post updated successfully']);
     }
